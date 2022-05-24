@@ -1,35 +1,36 @@
-const Gpio = require('onoff').Gpio;
-const nrfInterrupt = new Gpio(27, 'in', 'falling');
+const msgpack = require("msgpack-lite");
+const nrf24 = require("nrf24");
 
-//curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+var rf24 = new nrf24.nRF24(22, 0);
+rf24.begin();
+rf24.config({
+	PALevel: nrf24.RF24_PA_LOW,
+	DataRate: nrf24.RF24_1MBPS,
+	Irq: 27,
+});
 
-var rf24js = require('rf24js');
-var radio = rf24js.radio;
-var PALevel = rf24js.PALevel;
-var CRCLength = rf24js.CRCLength;
-var Datarate = rf24js.Datarate;
-
-/*
-var msgpack = require('msgpack5')() // namespace our extensions
-  , encode  = msgpack.encode
-  , decode  = msgpack.decode*/
+var airPipe = rf24.addReadPipe("0x65646f4e33");
+var waterPipe = rf24.addReadPipe("0x65646f4e34");
+var noisePipe = rf24.addReadPipe("0x65646f4e35");
   
-var msgpack = require("msgpack-lite");
+rf24.read( function (data,items) {
+	for(var i=0;i<items;i++) {
+		if(data[i].pipe == airPipe) {
+			// data[i].data will contain a buffer with the data
+			bufferPipe1 = data[i].data
+			console.log('Paquete %d de %d Air',bufferPipe2[0],bufferPipe2[2]);
+			construirPaqueteAir(bufferPipe2);
+		} else if (data[i].pipe == waterPipe) {
+			// rcv from 0xABCD11FF56
+		} else {
 
-radio.create(22, 0); // RaspberryPi 1/2/3 
-radio.begin();
-radio.setPALevel(0);
-radio.printDetails();
+		}
+	}
+  },
+  function(stop,by_user,err_count) {
 
-var pipe1 = new Buffer("1Node\0");
-var pipe2 = new Buffer("2Node\0");
-var pipe3 = new Buffer("3Node\0");
+  });
 
-radio.openWritingPipe(pipe1);
-radio.openReadingPipe(1, pipe2)
-radio.openReadingPipe(2, pipe3)
-radio.enableInterrupts(false,false,true);
-radio.startListening();
 
 var bufferPipe1 = Buffer.alloc(32);
 var bufferPipe2 = Buffer.alloc(32);
@@ -126,25 +127,3 @@ client.on('connect', function () {
  //}, 10000);//Keeps publishing every 2000 milliseconds.
 });
 
-
-/*while(1)
-{
-	if (radio.available())
-	{
-		buffer = radio.read(32);
-		console.log(buffer)
-		console.log('dato %d',cnt++);
-	}
-}*/
-/*
-async function loop() {
-		while (radio.available())
-		{
-			buffer = radio.read(32);
-			console.log(buffer)
-			console.log('dato %d',cnt++);
-		}
-	setTimeout(loop,100); 
-}
-
-loop();*/
