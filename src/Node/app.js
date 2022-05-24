@@ -46,6 +46,8 @@ var airQuality;
 
 var client = new ThingSpeakClient();
 client.attachChannel(1745957, { writeKey:'7CA43YA53WORU6WE', readKey:'PKWHFVAUC7I8A69X'});
+var dbUrl = "mongodb://localhost:27017/";
+
 
 process.on('SIGINT', () => {
 	//nrfInterrupt.unexport();
@@ -92,12 +94,33 @@ function construirPaqueteAir (bufAir) {
 			longitude: airQuality.gps.lon,
 			elevation: airQuality.gps.alt,
 		};
+		console.log(tsData);
 		client.updateChannel(1745957, tsData, function(err, resp) {
 			if (!err && resp > 0) {
 				console.log('update successfully. Entry number was: ' + resp);
 			}
 		});
+		writeToDB(airQuality);
 	}
+}
+
+function writeToDB (data) {
+	if (data.datetime.lastIndexOf("2000") != -1) {
+		var now = new Date();
+		data._id = now.toISOString();
+	} else {
+		data._id = data.datetime
+	}
+	delete data.datetime;
+	MongoClient.connect(url, function(err, db) {
+		if (err) throw err;
+		var dbo = db.db("pollution");
+		dbo.collection("airQuality").insertOne(data, function(err, res) {
+			if (err) throw err;
+			console.log("1 document inserted");
+			db.close();
+		});
+	});
 }
 
 
