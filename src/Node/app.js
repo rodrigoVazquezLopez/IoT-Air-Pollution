@@ -3,16 +3,16 @@ const nrf24 = require("nrf24");
 const ThingSpeakClient = require('thingspeakclient');
 
 var rf24 = new nrf24.nRF24(22, 0);
-rf24.begin();
+rf24.begin(print_debug=true);
 rf24.config({
 	PALevel: nrf24.RF24_PA_LOW,
 	DataRate: nrf24.RF24_1MBPS,
 	Irq: 27,
-});
+}, print_details=true);
 
-var airPipe = rf24.addReadPipe("0x65646f4e33");
-var waterPipe = rf24.addReadPipe("0x65646f4e34");
-var noisePipe = rf24.addReadPipe("0x65646f4e35");
+var airPipe = rf24.addReadPipe("0x65646f4e31");
+var waterPipe = rf24.addReadPipe("0x65646f4e32");
+var noisePipe = rf24.addReadPipe("0x65646f4e33");
   
 rf24.read( function (data,items) {
 	for(var i=0;i<items;i++) {
