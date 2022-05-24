@@ -43,7 +43,7 @@ var noise;
 var airQuality;
 
 var client = new ThingSpeakClient();
-client.attachChannel(1745957, { writeKey:'7CA43YA53WORU6WE', readKey:'PKWHFVAUC7I8A69X'}, callBack);
+client.attachChannel(1745957, { writeKey:'7CA43YA53WORU6WE', readKey:'PKWHFVAUC7I8A69X'});
 
 process.on('SIGINT', () => {
 	//nrfInterrupt.unexport();
