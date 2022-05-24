@@ -88,9 +88,9 @@ function construirPaqueteAir (bufAir) {
 			field6: airQuality.weather.temperature[0],
 			field7: airQuality.weather.humidity,
 			field8: airQuality.weather.pressure[1],
-			Latitude: airQuality.gps.lat,
-			Longitude: airQuality.gps.lon,
-			Elevation: airQuality.gps.alt,
+			latitude: airQuality.gps.lat,
+			longitude: airQuality.gps.lon,
+			elevation: airQuality.gps.alt,
 		};
 		client.updateChannel(1745957, tsData, function(err, resp) {
 			if (!err && resp > 0) {
