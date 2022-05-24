@@ -81,7 +81,7 @@ function construirPaqueteAir (bufAir) {
 			if (!err && resp > 0) {
 				console.log('update successfully. Entry number was: ' + resp);
 			}
-		};
+		});
 	}
 }
 
