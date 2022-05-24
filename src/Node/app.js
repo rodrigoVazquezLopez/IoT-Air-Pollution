@@ -23,7 +23,9 @@ rf24.read( function (data,items) {
 		} else if (data[i].pipe == waterPipe) {
 			// rcv from 0xABCD11FF56
 		} else {
-
+			bufferPipe2 = data[i].data;
+			console.log('Paquete %d de %d Noise',bufferPipe1[0],bufferPipe1[2]);
+			construirPaqueteNoise(bufferPipe1);
 		}
 	}
   },
@@ -39,27 +41,10 @@ var msgAir = Buffer.alloc(256);
 var noise;
 var airQuality;
 
-nrfInterrupt.watch(function(err,value) {
-	if(err) {
-		console.log(err);
-	} else {
-		var check = radio.availableFull();
-		if(check.channel == 1) {
-			bufferPipe1 = radio.read(32);
-			console.log('Paquete %d de %d Noise',bufferPipe1[0],bufferPipe1[2]);
-			construirPaqueteNoise(bufferPipe1);
-		}
-		if(check.channel == 2) {
-			bufferPipe2 = radio.read(32);
-			console.log('Paquete %d de %d Air',bufferPipe2[0],bufferPipe2[2]);
-			construirPaqueteAir(bufferPipe2);
-		}
-		
-	}
-});
+
 
 process.on('SIGINT', () => {
-	nrfInterrupt.unexport();
+	//nrfInterrupt.unexport();
 });
 
 function construirPaqueteNoise (bufNoise) {
