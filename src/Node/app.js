@@ -1,6 +1,7 @@
 const msgpack = require("msgpack-lite");
 const nrf24 = require("nrf24");
 const ThingSpeakClient = require('thingspeakclient');
+const MongoClient = require('mongodb').MongoClient;
 
 var rf24 = new nrf24.nRF24(22, 0);
 rf24.begin(print_debug=true);
@@ -19,7 +20,7 @@ rf24.read( function (data,items) {
 		if(data[i].pipe == airPipe) {
 			// data[i].data will contain a buffer with the data
 			bufferPipe1 = data[i].data;
-			console.log(data[i].data);
+			//console.log(data[i].data);
 			console.log('Paquete %d de %d Air',bufferPipe1[0],bufferPipe1[2]);
 			construirPaqueteAir(bufferPipe1);
 		} else if (data[i].pipe == waterPipe) {
@@ -83,10 +84,13 @@ function construirPaqueteAir (bufAir) {
 			field2: airQuality.pollutant.O3,
 			field3: airQuality.pollutant.PM25,
 			field4: airQuality.pollutant.PM10,
-			field5: airQuality.pollutant.UVIndex,
+			field5: airQuality.pollutant.UVindex,
 			field6: airQuality.weather.temperature[0],
 			field7: airQuality.weather.humidity,
-			field8: airQuality.weather.pressure[0],
+			field8: airQuality.weather.pressure[1],
+			Latitude: airQuality.gps.lat,
+			Longitude: airQuality.gps.lon,
+			Elevation: airQuality.gps.alt,
 		};
 		client.updateChannel(1745957, tsData, function(err, resp) {
 			if (!err && resp > 0) {
