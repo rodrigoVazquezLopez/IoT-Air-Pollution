@@ -10,23 +10,24 @@ rf24.config({
 	Irq: 27,
 }, print_details=true);
 
-var airPipe = rf24.addReadPipe("0x65646f4e31");
-var waterPipe = rf24.addReadPipe("0x65646f4e32");
-var noisePipe = rf24.addReadPipe("0x65646f4e33");
+var airPipe = rf24.addReadPipe("0x65646f4e31", true);
+var waterPipe = rf24.addReadPipe("0x65646f4e32", true);
+var noisePipe = rf24.addReadPipe("0x65646f4e33", true);
   
 rf24.read( function (data,items) {
 	for(var i=0;i<items;i++) {
 		if(data[i].pipe == airPipe) {
 			// data[i].data will contain a buffer with the data
 			bufferPipe1 = data[i].data
+			console.log(data[i].data)
 			console.log('Paquete %d de %d Air',bufferPipe2[0],bufferPipe2[2]);
-			construirPaqueteAir(bufferPipe2);
+			construirPaqueteAir(bufferPipe1);
 		} else if (data[i].pipe == waterPipe) {
 			// rcv from 0xABCD11FF56
 		} else {
 			bufferPipe2 = data[i].data;
 			console.log('Paquete %d de %d Noise',bufferPipe1[0],bufferPipe1[2]);
-			construirPaqueteNoise(bufferPipe1);
+			construirPaqueteNoise(bufferPipe2);
 		}
 	}
   },
