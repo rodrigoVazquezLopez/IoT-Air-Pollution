@@ -1,5 +1,6 @@
 const msgpack = require("msgpack-lite");
 const nrf24 = require("nrf24");
+const ThingSpeakClient = require('thingspeakclient');
 
 var rf24 = new nrf24.nRF24(22, 0);
 rf24.begin();
@@ -41,7 +42,8 @@ var msgAir = Buffer.alloc(256);
 var noise;
 var airQuality;
 
-
+var client = new ThingSpeakClient();
+client.attachChannel(1745957, { writeKey:'7CA43YA53WORU6WE', readKey:'PKWHFVAUC7I8A69X'}, callBack);
 
 process.on('SIGINT', () => {
 	//nrfInterrupt.unexport();
@@ -75,40 +77,15 @@ function construirPaqueteAir (bufAir) {
 	if(numPaq == numPaqAir-1) {		
 		airQuality = msgpack.decode(msgAir);
 		console.log(airQuality);
-		if(client.connected) {
-			client.publish(TOPIC, JSON.stringify(airQuality));
-			console.log('publicado');
-		}
+		client.updateChannel(1745957, {field1: 7, field2: 6}, function(err, resp) {
+			if (!err && resp > 0) {
+				console.log('update successfully. Entry number was: ' + resp);
+			}
+		};
 	}
 }
 
-var ORG = 'quickstart';
-var TYPE = 'gateway';
-var ID = 'gateway984fee057265';
-var AUTHTOKEN = 'dsiclerma';
-
-var mqtt = require('mqtt');
-
-var PROTOCOL = 'mqtt';
-var BROKER = ORG + '.messaging.internetofthings.ibmcloud.com';
-var PORT = 1883;
-
-var URL = PROTOCOL + '://' + BROKER;
-URL += ':' + PORT; 
-
-var CLIENTID= 'd:' + ORG;
-CLIENTID += ':' + TYPE;
-CLIENTID += ':' + ID;
-var AUTHMETHOD = 'use-token-auth';
-
-var client  = mqtt.connect(URL, { clientId: CLIENTID, username: AUTHMETHOD, password: AUTHTOKEN });
-var TOPIC = 'iot-2/evt/status/fmt/json';
-console.log(TOPIC);
 
 
 
-client.on('connect', function () {
- //setInterval(function(){client.publish(TOPIC, JSON.stringify(noise));//Payload is JSON
- //}, 10000);//Keeps publishing every 2000 milliseconds.
-});
 
