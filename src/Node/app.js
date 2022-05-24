@@ -94,7 +94,7 @@ function construirPaqueteAir (bufAir) {
 			longitude: airQuality.gps.lon,
 			elevation: airQuality.gps.alt,
 		};
-		console.log(tsData);
+		//console.log(tsData);
 		client.updateChannel(1745957, tsData, function(err, resp) {
 			if (!err && resp > 0) {
 				console.log('update successfully. Entry number was: ' + resp);
@@ -112,7 +112,7 @@ function writeToDB (data) {
 		data._id = data.datetime
 	}
 	delete data.datetime;
-	MongoClient.connect(url, function(err, db) {
+	MongoClient.connect(dbUrl, function(err, db) {
 		if (err) throw err;
 		var dbo = db.db("pollution");
 		dbo.collection("airQuality").insertOne(data, function(err, res) {
