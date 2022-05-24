@@ -18,15 +18,15 @@ rf24.read( function (data,items) {
 	for(var i=0;i<items;i++) {
 		if(data[i].pipe == airPipe) {
 			// data[i].data will contain a buffer with the data
-			bufferPipe1 = data[i].data
-			console.log(data[i].data)
-			console.log('Paquete %d de %d Air',bufferPipe2[0],bufferPipe2[2]);
+			bufferPipe1 = data[i].data;
+			console.log(data[i].data);
+			console.log('Paquete %d de %d Air',bufferPipe1[0],bufferPipe1[2]);
 			construirPaqueteAir(bufferPipe1);
 		} else if (data[i].pipe == waterPipe) {
 			// rcv from 0xABCD11FF56
 		} else {
 			bufferPipe2 = data[i].data;
-			console.log('Paquete %d de %d Noise',bufferPipe1[0],bufferPipe1[2]);
+			console.log('Paquete %d de %d Noise',bufferPipe2[0],bufferPipe2[2]);
 			construirPaqueteNoise(bufferPipe2);
 		}
 	}
@@ -78,7 +78,17 @@ function construirPaqueteAir (bufAir) {
 	if(numPaq == numPaqAir-1) {		
 		airQuality = msgpack.decode(msgAir);
 		console.log(airQuality);
-		client.updateChannel(1745957, {field1: 7, field2: 6}, function(err, resp) {
+		tsData = {
+			field1: airQuality.pollutant.CO,
+			field2: airQuality.pollutant.O3,
+			field3: airQuality.pollutant.PM25,
+			field4: airQuality.pollutant.PM10,
+			field5: airQuality.pollutant.UVIndex,
+			field6: airQuality.weather.temperature[0],
+			field7: airQuality.weather.humidity,
+			field8: airQuality.weather.pressure[0],
+		};
+		client.updateChannel(1745957, tsData, function(err, resp) {
 			if (!err && resp > 0) {
 				console.log('update successfully. Entry number was: ' + resp);
 			}
