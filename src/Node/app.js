@@ -12,18 +12,28 @@ rf24.config({
 }, print_details=true);
 
 var client = new ThingSpeakClient();
-client.attachChannel(1745957, { writeKey:'7CA43YA53WORU6WE', readKey:'PKWHFVAUC7I8A69X'});
+var tsChannel = 1745957;
+client.attachChannel(tsChannel, { writeKey:'7CA43YA53WORU6WE', readKey:'PKWHFVAUC7I8A69X'});
 var dbUrl = "mongodb://localhost:27017/";
 
-var airPipe = rf24.addReadPipe("0x65646f4e31", true);
-var waterPipe = rf24.addReadPipe("0x65646f4e32", true);
-var noisePipe = rf24.addReadPipe("0x65646f4e33", true);
+var airDirection = "0x65646f4e31";
+var waterDirection = "0x65646f4e32";
+var noiseDirection = "0x65646f4e33";
+
+var airPipe = rf24.addReadPipe(airDirection, true);
+var waterPipe = rf24.addReadPipe(waterDirection, true);
+var noisePipe = rf24.addReadPipe(noiseDirection, true);
 
 var bufferPipe1 = Buffer.alloc(32);
 var bufferPipe2 = Buffer.alloc(32);
-var msgNoise = Buffer.alloc(256);
+var bufferPipe3 = Buffer.alloc(32);
+
 var msgAir = Buffer.alloc(256);
+var msgWater = Buffer.alloc(256);
+var msgNoise = Buffer.alloc(256);
+
 var noise;
+var waterQuality;
 var airQuality;
   
 rf24.read( function (data,items) {
@@ -32,26 +42,37 @@ rf24.read( function (data,items) {
 			// data[i].data will contain a buffer with the data
 			bufferPipe1 = data[i].data;
 			//console.log(data[i].data);
-			console.log('Paquete %d de %d Air',bufferPipe1[0] + 1, bufferPipe1[2]);
+			console.log('Air Quality package %d/%d from %s',bufferPipe1[0] + 1, bufferPipe1[2], airDirection);
 			//construirPaqueteAir(bufferPipe1);
 			if (reconstruirMensaje(bufferPipe1, msgAir)) {
 				airQuality = msgpack.decode(msgAir);
 				console.log(airQuality);
-				sendToThingSpeak(airQuality, 1745957);
-				writeToDB(airQuality)
+				sendToThingSpeak(airQuality, tsChannel);
+				writeToDB(airQuality, "airQuality")
 			}
 		} else if (data[i].pipe == waterPipe) {
 			// rcv from 0xABCD11FF56
+			bufferPipe2 = data[i].data
+			console.log('Water Quality package %d/%d from %s',bufferPipe2[0] + 1, bufferPipe2[2], waterDirection);
+			if (reconstruirMensaje(bufferPipe2, msgWater)) {
+				waterQuality = msgpack.decode(msgWater);
+				console.log(waterQuality);
+				sendToThingSpeak(waterQuality, tsChannel);
+				writeToDB(waterQuality, "waterQuality");
+			}
 		} else {
-			bufferPipe2 = data[i].data;
-			console.log('Paquete %d de %d Noise',bufferPipe2[0],bufferPipe2[2]);
-			construirPaqueteNoise(bufferPipe2);
+			bufferPipe3 = data[i].data;
+			console.log('Noise Package %d/%d from %s',bufferPipe3[0] + 1, bufferPipe3[2], noiseDirection);
+			if (reconstruirMensaje(bufferPipe3, msgNoise)) {
+				noise = msgpack.decode(msgNoise);
+				console.log(noise);
+				sendToThingSpeak(noise, tsChannel);
+				writeToDB(noise, "noise");
+			}
 		}
-	}
-  },
-  function(stop,by_user,err_count) {
-
-  });
+	}}, function(stop,by_user,err_count) {
+		console.log("Error");
+	});
 
 
 function reconstruirMensaje (package, msgBuffer) {
@@ -104,20 +125,20 @@ function sendToThingSpeak (data, channel) {
 	});
 }
 
-function writeToDB (data) {
+function writeToDB (data, collection) {
 	if (data.datetime.lastIndexOf("2000") != -1) {
 		var now = new Date();
 		data._id = now.toISOString();
 	} else {
-		data._id = data.datetime
+		data._id = data.datetime;
 	}
 	delete data.datetime;
 	MongoClient.connect(dbUrl, function(err, db) {
 		if (err) throw err;
 		var dbo = db.db("pollution");
-		dbo.collection("airQuality").insertOne(data, function(err, res) {
+		dbo.collection(collection).insertOne(data, function(err, res) {
 			if (err) throw err;
-			console.log("1 document inserted");
+			console.log("1 document inserted on %s in DB", collection);
 			db.close();
 		});
 	});
