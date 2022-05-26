@@ -34,7 +34,7 @@ rf24.read( function (data,items) {
 			//console.log(data[i].data);
 			console.log('Paquete %d de %d Air',bufferPipe1[0] + 1, bufferPipe1[2]);
 			//construirPaqueteAir(bufferPipe1);
-			if (reconstruirMensaje(bufferPipe1)) {
+			if (reconstruirMensaje(bufferPipe1, msgAir)) {
 				airQuality = msgpack.decode(msgAir);
 				console.log(airQuality);
 				sendToThingSpeak(airQuality, 1745957);
@@ -60,7 +60,7 @@ function reconstruirMensaje (package, msgBuffer) {
 	var numTotalPaq = package[2];
 	var numBytes = package[3];
 	
-	msgAir.copy(msgBuffer, numPaq*28, 4, numBytes+4);
+	package.copy(msgBuffer, numPaq*28, 4, numBytes+4);
 	if(numPaq == numTotalPaq-1) {		
 		return true;
 	}
