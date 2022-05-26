@@ -65,7 +65,7 @@ function reconstruirMensaje (package, msgBuffer) {
 	var numTotalPaq = package[2];
 	var numBytes = package[3];
 	
-	bufNoise.copy(msgBuffer, numPaq*28, 4, numBytes+4);
+	msgAir.copy(msgBuffer, numPaq*28, 4, numBytes+4);
 	if(numPaq == numTotalPaq-1) {		
 		return true;
 	}
