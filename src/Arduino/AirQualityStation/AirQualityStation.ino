@@ -11,7 +11,8 @@
 #include <printf.h>
 #include <RF24.h>
 #include <RF24_config.h>.
-#include <HKA5_PMSensor.h>
+//#include <HKA5_PMSensor.h>
+#include <PMS5003TSSensor.h>
 #include <MsgPackMap.h>
 
 // Sensors Pin
@@ -83,7 +84,8 @@ MsgPackMap parser(msgpackBuffer, 250);
 RF24 radio(CE_PIN, CSN_PIN);
 TinyGPSPlus gpsAir;
 SFE_BMP180 bmpSensor;
-HKA5_PMSensor PMsensor(Serial2);
+//HKA5_PMSensor PMsensor(Serial2);
+PMS5003TSSensor PMsensor(Serial2);
 DHT_Unified dhtSensor(DHT_PIN, DHTTYPE);
 sensors_event_t dhtEvent;
 DFRobot_VEML6075_IIC VEML6075(&Wire, VEML6075_ADDR);
@@ -211,11 +213,11 @@ void enviarDatos(int tam, uint8_t id)
         myTFT.printNumI(totalPackets, fontSize*18, 32, 2);
         if(radio.write(&data,(int)bytesPerPacket+4))
         {
-            myTFT.print("Recibido", RIGHT, 32);
+            myTFT.print("Packet received", RIGHT, 32);
         }
         else
         {
-            myTFT.print("NO Recibido", RIGHT, 32);
+            myTFT.print("Packet NOT reeived", RIGHT, 32);
         }
         delay(100);
     }
@@ -241,14 +243,14 @@ void checkSensors()
     myTFT.setColor(255, 255, 255);
     myTFT.setBackColor(255, 0, 0);
     myTFT.drawLine(0, 14, dispx-1, 14);
-    myTFT.print("AIR MODULE - IPN-CIDETEC", CENTER, 1);
+    myTFT.print("AIR QUALITY STATION", CENTER, 1);
     myTFT.setBackColor(0, 0, 0);
-    myTFT.print("WELCOME!!", CENTER, 30);
+    myTFT.print("STARTING...", CENTER, 30);
     myTFT.print("IPN-CIDETEC", CENTER, 60);
-    myTFT.print("MAESTRIA EN TECNOLOGIA DE COMPUTO", CENTER, 72);
-    myTFT.print("TESIS", CENTER, 84);
+    myTFT.print("UAM LERMA", CENTER, 72);
+    myTFT.print("DEPARTAMENTO DE PROCESOS PRODUCTIVOS", CENTER, 84);
         
-    myTFT.print("HK-A5", LEFT, 120);
+    myTFT.print("PMS5003TS", LEFT, 120);
     if(Serial2.available() > 0)
     {
         myTFT.setColor(255, 215, 0);
@@ -310,11 +312,11 @@ void printBackground()
     myTFT.setColor(255, 255, 255);
     myTFT.setBackColor(255, 0, 0);
     myTFT.drawLine(0, 14, dispx-1, 14);
-    myTFT.print("AIR MODULE - IPN-CIDETEC", CENTER, 1);
+    myTFT.print("AIR QUALITY STATION", CENTER, 1);
     myTFT.setBackColor(0, 0, 0);
     myTFT.print("Sampling...", LEFT, 20);
 
-    myTFT.print("Dir: 1node", RIGHT, 20);
+    myTFT.print("Dir: 0x65646F6E31", RIGHT, 20);
 
     myTFT.setColor(0, 0, 0);
     myTFT.fillRect(5, 65, dispx-5, 173);
