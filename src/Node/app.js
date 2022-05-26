@@ -54,11 +54,6 @@ rf24.read( function (data,items) {
   });
 
 
-
-
-
-
-
 function reconstruirMensaje (package, msgBuffer) {
 	var numPaq = package[0];
 	var id = package[1]
